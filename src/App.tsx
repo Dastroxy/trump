@@ -15,6 +15,7 @@ import { RoundScoringModal } from './components/RoundScoringModal.tsx';
 import { ResultsView } from './components/ResultsView.tsx';
 import { EngineTestModal } from './components/EngineTestModal.tsx';
 import { sound } from './utils/sound.ts';
+import { gameService } from './services/gameService.ts';
 
 function getOrCreatePlayerId(): string {
   let pid = localStorage.getItem('hexatrump_pid');
@@ -37,7 +38,7 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [engineTestModalOpen, setEngineTestModalOpen] = useState<boolean>(false);
 
-  const eventSourceRef = useRef<EventSource | null>(null);
+  const roomUnsubscribeRef = useRef<(() => void) | null>(null);
 
   // Sync player profile to localStorage
   const handlePlayerNameChange = (name: string) => {
@@ -50,31 +51,26 @@ export default function App() {
     localStorage.setItem('trump_avatar', avatar);
   };
 
-  // Reconnection helper for SSE
-  const connectToRoomSSE = useCallback(
+  // Real-time room subscription helper
+  const connectToRoom = useCallback(
     (roomId: string) => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
+      if (roomUnsubscribeRef.current) {
+        roomUnsubscribeRef.current();
+        roomUnsubscribeRef.current = null;
       }
 
-      const sse = new EventSource(`/api/rooms/${roomId}/events?playerId=${playerId}`);
-      eventSourceRef.current = sse;
-
-      sse.onopen = () => {
-        setConnected(true);
-      };
-
-      sse.onmessage = (event) => {
-        try {
-          const data: SanitizedClientState = JSON.parse(event.data);
-          setClientState(data);
+      const unsub = gameService.subscribeToRoom(
+        roomId,
+        playerId,
+        (state) => {
+          setClientState(state);
           setConnected(true);
-        } catch {}
-      };
-
-      sse.onerror = () => {
-        setConnected(false);
-      };
+        },
+        (isConnected) => {
+          setConnected(isConnected);
+        }
+      );
+      roomUnsubscribeRef.current = unsub;
     },
     [playerId]
   );
@@ -86,168 +82,152 @@ export default function App() {
 
     if (roomParam) {
       const sanitizedRoom = roomParam.trim().toUpperCase();
-      fetch(`/api/rooms/${sanitizedRoom}?playerId=${playerId}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data: SanitizedClientState | null) => {
-          if (data) {
-            setClientState(data);
-            localStorage.setItem('hexatrump_last_room', sanitizedRoom);
-            connectToRoomSSE(sanitizedRoom);
-          }
-        })
-        .catch(() => {});
+      gameService.getRoomState(sanitizedRoom, playerId).then((data) => {
+        if (data) {
+          setClientState(data);
+          localStorage.setItem('hexatrump_last_room', sanitizedRoom);
+          connectToRoom(sanitizedRoom);
+        }
+      }).catch(() => {});
     }
 
     return () => {
-      eventSourceRef.current?.close();
+      if (roomUnsubscribeRef.current) {
+        roomUnsubscribeRef.current();
+        roomUnsubscribeRef.current = null;
+      }
     };
-  }, [playerId, connectToRoomSSE]);
+  }, [playerId, connectToRoom]);
 
-  // Host Game API
+  // Host Game
   const handleHostGame = async () => {
     try {
       setErrorMessage(null);
-      const res = await fetch('/api/rooms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          hostId: playerId,
-          hostName: playerName.trim(),
-          hostAvatar: selectedAvatar,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setErrorMessage(data.error || 'Failed to create room');
-        return;
-      }
-      setClientState(data.state);
-      localStorage.setItem('hexatrump_last_room', data.roomId);
+      const effectiveName = playerName.trim() || 'Host';
+      const result = await gameService.hostGame(
+        playerId,
+        effectiveName,
+        selectedAvatar
+      );
+      setClientState(result.state);
+      localStorage.setItem('hexatrump_last_room', result.roomId);
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.set('room', data.roomId);
+      newUrl.searchParams.set('room', result.roomId);
       window.history.pushState({}, '', newUrl.toString());
-      connectToRoomSSE(data.roomId);
-    } catch {
-      setErrorMessage('Network connection error');
+      connectToRoom(result.roomId);
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to host game');
     }
   };
 
-  // Join Game API
+  // Join Game
   const handleJoinGame = async (code: string) => {
     try {
       setErrorMessage(null);
-      const res = await fetch(`/api/rooms/${code}/join`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          playerId,
-          name: playerName.trim(),
-          avatar: selectedAvatar,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setErrorMessage(data.error || 'Could not join room');
-        return;
-      }
-      setClientState(data);
+      const effectiveName = playerName.trim() || 'Player';
+      const state = await gameService.joinGame(
+        code,
+        playerId,
+        effectiveName,
+        selectedAvatar
+      );
+      setClientState(state);
       localStorage.setItem('hexatrump_last_room', code);
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.set('room', code);
       window.history.pushState({}, '', newUrl.toString());
-      connectToRoomSSE(code);
-    } catch {
-      setErrorMessage('Network connection error');
+      connectToRoom(code);
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Could not join room');
     }
   };
 
   // Settings update
   const handleUpdateSettings = async (newSettings: Partial<GameSettings>) => {
     if (!clientState) return;
-    await fetch(`/api/rooms/${clientState.roomId}/settings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requesterId: playerId,
-        settings: newSettings,
-      }),
-    });
+    try {
+      await gameService.updateSettings(clientState.roomId, playerId, newSettings);
+    } catch (err: any) {
+      console.error('Settings update error:', err);
+    }
   };
 
   // Fill remaining seats with Bots
   const handleFillBots = async () => {
     if (!clientState) return;
-    await fetch(`/api/rooms/${clientState.roomId}/fill-bots`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requesterId: playerId }),
-    });
+    try {
+      await gameService.fillBots(clientState.roomId, playerId);
+    } catch (err: any) {
+      console.error('Fill bots error:', err);
+    }
   };
 
   // Start Seating Phase
   const handleStartSeating = async () => {
     if (!clientState) return;
-    await fetch(`/api/rooms/${clientState.roomId}/start-seating`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requesterId: playerId }),
-    });
+    try {
+      await gameService.startSeating(clientState.roomId, playerId);
+    } catch (err: any) {
+      console.error('Start seating error:', err);
+    }
   };
 
   // Select Seat
   const handleSelectSeat = async (seatIndex: number) => {
     if (!clientState) return;
-    await fetch(`/api/rooms/${clientState.roomId}/seat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId, seatIndex }),
-    });
+    try {
+      await gameService.selectSeat(clientState.roomId, playerId, seatIndex);
+    } catch (err: any) {
+      console.error('Select seat error:', err);
+    }
   };
 
   // Start Game (from Team Reveal)
   const handleStartGame = async () => {
     if (!clientState) return;
-    await fetch(`/api/rooms/${clientState.roomId}/start-game`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requesterId: playerId }),
-    });
+    try {
+      await gameService.startGame(clientState.roomId, playerId);
+    } catch (err: any) {
+      console.error('Start game error:', err);
+    }
   };
 
   // Submit Bid
   const handleSubmitBid = async (bid: number) => {
     if (!clientState) return;
-    await fetch(`/api/rooms/${clientState.roomId}/bid`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId, bid }),
-    });
+    try {
+      await gameService.submitBid(clientState.roomId, playerId, bid);
+    } catch (err: any) {
+      console.error('Submit bid error:', err);
+    }
   };
 
   // Play Card (Confirmed second tap)
   const handlePlayCard = async (cardId: string) => {
     if (!clientState) return;
-    await fetch(`/api/rooms/${clientState.roomId}/play`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId, cardId }),
-    });
+    try {
+      await gameService.playCard(clientState.roomId, playerId, cardId);
+    } catch (err: any) {
+      console.error('Play card error:', err);
+    }
   };
 
   // Next Game (from Round Scoring)
   const handleNextGame = async () => {
     if (!clientState) return;
-    await fetch(`/api/rooms/${clientState.roomId}/next-game`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requesterId: playerId }),
-    });
+    try {
+      await gameService.nextGame(clientState.roomId, playerId);
+    } catch (err: any) {
+      console.error('Next game error:', err);
+    }
   };
 
   // Return to Home
   const handleReturnHome = () => {
-    eventSourceRef.current?.close();
-    eventSourceRef.current = null;
+    if (roomUnsubscribeRef.current) {
+      roomUnsubscribeRef.current();
+      roomUnsubscribeRef.current = null;
+    }
     setClientState(null);
     localStorage.removeItem('hexatrump_last_room');
     const newUrl = new URL(window.location.href);

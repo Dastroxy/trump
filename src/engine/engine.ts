@@ -514,30 +514,46 @@ export function resolveCurrentTrick(room: GameRoomState): void {
   // We can automatically advance or allow client animation timeout
   // For authoritative state, we schedule / set up next trick state
   setTimeout(() => {
-    if (trick.trickNumber < 9) {
-      // Start next trick
-      const nextTrickNumber = trick.trickNumber + 1;
-      room.phase = 'TRICK_PLAY';
-      room.currentTurnSeat = winnerSeat;
-      room.currentTrick = {
-        trickNumber: nextTrickNumber,
-        leaderSeat: winnerSeat,
-        ledSuit: null,
-        cards: [],
-        winnerSeat: null,
-        winnerPlayerId: null,
-        winningCard: null,
-      };
-      room.lastActionMessage = `Trick ${nextTrickNumber} of 9. ${winningPlayer.name} leads.`;
-      room.updatedAt = Date.now();
+    if (room.phase === 'TRICK_RESOLUTION') {
+      advanceTrickOrFinishRound(room);
       triggerRoomUpdate(room.roomId);
       checkTurnAutomations(room);
-    } else {
-      // All 9 tricks complete -> GAME_SCORING!
-      finishGameRound(room);
-      triggerRoomUpdate(room.roomId);
     }
   }, 1600);
+}
+
+/**
+ * Advances a trick in resolution to the next trick or finishes the round.
+ */
+export function advanceTrickOrFinishRound(room: GameRoomState): boolean {
+  if (room.phase !== 'TRICK_RESOLUTION' || !room.currentTrick) return false;
+  const trick = room.currentTrick;
+  const winnerSeat = trick.winnerSeat!;
+  const winnerPlayerId = trick.winnerPlayerId!;
+  const winningPlayer = room.players[winnerPlayerId];
+
+  if (trick.trickNumber < 9) {
+    // Start next trick
+    const nextTrickNumber = trick.trickNumber + 1;
+    room.phase = 'TRICK_PLAY';
+    room.currentTurnSeat = winnerSeat;
+    room.currentTrick = {
+      trickNumber: nextTrickNumber,
+      leaderSeat: winnerSeat,
+      ledSuit: null,
+      cards: [],
+      winnerSeat: null,
+      winnerPlayerId: null,
+      winningCard: null,
+    };
+    room.lastActionMessage = `Trick ${nextTrickNumber} of 9. ${winningPlayer?.name || 'Winner'} leads.`;
+    room.updatedAt = Date.now();
+    return true;
+  } else {
+    // All 9 tricks complete -> GAME_SCORING!
+    finishGameRound(room);
+    return true;
+  }
 }
 
 /**
@@ -702,6 +718,57 @@ function checkAndTriggerBotBid(room: GameRoomState): void {
       }
     }, 500);
   }
+}
+
+/**
+ * Evaluates whether an automated action (bot bid, bot play, or auto-play final Joker) is pending.
+ */
+export function getBotAction(room: GameRoomState): { type: 'bid'; playerId: string; bid: number } | { type: 'play'; playerId: string; cardId: string } | null {
+  if (room.phase === 'BIDDING' && room.currentBidderSeat !== null) {
+    const playerId = room.seats[room.currentBidderSeat];
+    if (playerId && room.players[playerId]?.isBot) {
+      const hand = room.hands[playerId] || [];
+      const trump = room.trumpSuit;
+      let estimated = 0;
+      for (const c of hand) {
+        if (c.isJoker) estimated += 1;
+        else if (c.suit === trump && c.value >= 11) estimated += 1;
+        else if (c.value === 14) estimated += 1;
+      }
+      const minBid = room.settings.nilBonusEnabled ? 0 : 1;
+      const bid = Math.max(minBid, Math.min(4, estimated));
+      return { type: 'bid', playerId, bid };
+    }
+  }
+
+  if (room.phase === 'TRICK_PLAY' && room.currentTurnSeat !== null && room.currentTrick) {
+    const playerId = room.seats[room.currentTurnSeat];
+    if (playerId) {
+      const player = room.players[playerId];
+      const hand = room.hands[playerId] || [];
+
+      // 1. Final-card Joker automatic play
+      if (hand.length === 1 && hand[0].isJoker) {
+        return { type: 'play', playerId, cardId: hand[0].id };
+      }
+
+      // 2. Bot turn
+      if (player?.isBot) {
+        const legalCards = getLegalCards(
+          hand,
+          room.currentTrick.trickNumber,
+          9,
+          room.currentTrick.ledSuit
+        );
+        if (legalCards.length > 0) {
+          legalCards.sort((a, b) => a.value - b.value);
+          return { type: 'play', playerId, cardId: legalCards[0].id };
+        }
+      }
+    }
+  }
+
+  return null;
 }
 
 /**
