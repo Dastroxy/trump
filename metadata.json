@@ -1,0 +1,6 @@
+{
+  "name": "Trump",
+  "description": "Authoritative real-time 6-player Trump card game with hexagonal table seating, 3-team bidding, Joker rules, and robust game engine validation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
