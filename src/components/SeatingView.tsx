@@ -73,7 +73,7 @@ export const SeatingView: React.FC<SeatingViewProps> = ({
                     }
                   }}
                   className={`
-                    p-3.5 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-between min-h-[140px] text-center
+                    p-3.5 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-between min-h-[140px] text-center touch-manipulation active:scale-[0.98]
                     ${
                       isMySeat
                         ? 'bg-blue-50 border-blue-500 shadow-sm ring-2 ring-blue-300'
@@ -203,14 +203,14 @@ export const SeatingView: React.FC<SeatingViewProps> = ({
           </div>
 
           {/* Host Start Game button */}
-          <div className="flex justify-center">
+          <div className="flex justify-center w-full">
             {isHost ? (
               <button
                 onClick={() => {
                   sound.playDeal();
                   onStartGame();
                 }}
-                className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm tracking-wider uppercase shadow-md shadow-blue-500/25 flex items-center gap-2 transition-all cursor-pointer"
+                className="w-full sm:w-auto min-h-[48px] px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-extrabold text-sm tracking-wider uppercase shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation"
               >
                 <Play className="w-4 h-4 fill-current" />
                 <span>Deal Cards & Start Game 1</span>

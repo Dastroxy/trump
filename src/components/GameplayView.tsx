@@ -111,9 +111,9 @@ export const GameplayView: React.FC<GameplayViewProps> = ({
           </div>
 
           {/* Cards Container: No overlap, fully visible, crisp colored pips */}
-          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-full py-1">
+          <div className="flex flex-wrap items-center justify-center gap-1 xs:gap-1.5 sm:gap-2 max-w-full py-1 touch-manipulation">
             {sortedHand.map((card) => (
-              <div key={card.id} className="transition-transform hover:scale-105">
+              <div key={card.id} className="transition-transform hover:scale-105 active:scale-95">
                 <CardView
                   card={card}
                   isLegal={true}

@@ -74,9 +74,9 @@ export const PlayerHand: React.FC<PlayerHandProps> = ({
   const selectedCard = sortedHand.find((c) => c.id === selectedCardId);
 
   return (
-    <div className="w-full flex flex-col items-center select-none pb-2 pt-1">
+    <div className="w-full flex flex-col items-center select-none pb-2 pt-1 touch-manipulation">
       {/* Turn & Play Hint Bar */}
-      <div className="h-10 flex items-center justify-center mb-1">
+      <div className="min-h-[44px] flex items-center justify-center mb-1">
         {isMyTurn ? (
           selectedCard ? (
             <button
@@ -85,7 +85,7 @@ export const PlayerHand: React.FC<PlayerHandProps> = ({
                 setSelectedCardId(null);
                 onPlayCard(selectedCard.id);
               }}
-              className="flex items-center gap-1.5 px-5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-blue-500/30 transition-all cursor-pointer animate-bounce"
+              className="min-h-[44px] flex items-center gap-1.5 px-4 sm:px-6 py-2 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-blue-500/30 transition-all cursor-pointer touch-manipulation"
             >
               <Play className="w-4 h-4 fill-current" />
               <span>
@@ -93,7 +93,7 @@ export const PlayerHand: React.FC<PlayerHandProps> = ({
               </span>
             </button>
           ) : (
-            <div className="px-4 py-1.5 rounded-full bg-white border border-blue-400 text-blue-700 text-xs sm:text-sm font-bold tracking-wide shadow-xs animate-pulse">
+            <div className="min-h-[40px] flex items-center px-4 py-1.5 rounded-full bg-white border border-blue-400 text-blue-700 text-xs sm:text-sm font-bold tracking-wide shadow-xs animate-pulse">
               YOUR TURN — TAP A CARD TO PLAY
             </div>
           )
@@ -105,7 +105,7 @@ export const PlayerHand: React.FC<PlayerHandProps> = ({
       </div>
 
       {/* Hand Cards Container (Organized in suit groups without overlapping) */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 px-2 max-w-full py-2">
+      <div className="flex flex-wrap items-center justify-center gap-1 xs:gap-1.5 sm:gap-2 px-1 sm:px-2 max-w-full py-1.5 touch-manipulation">
         {sortedHand.map((card) => {
           const legality = validateCardPlay(card, hand, trickNumber, 9, ledSuit);
           // Only dim illegal cards when it IS the player's turn to play; otherwise keep cards clear & opaque

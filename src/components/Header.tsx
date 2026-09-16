@@ -34,24 +34,24 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="h-14 px-3 sm:px-6 bg-slate-100 border-b border-slate-300 flex items-center justify-between text-slate-800 z-40 select-none shadow-xs">
+    <header className="min-h-14 pt-[env(safe-area-inset-top)] px-3 sm:px-6 bg-slate-100 border-b border-slate-300 flex items-center justify-between text-slate-800 z-40 select-none shadow-xs">
       {/* Left: Room Code & Link */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 py-2">
         {roomId ? (
-          <div className="flex items-center bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs gap-1.5 shadow-2xs">
+          <div className="flex items-center bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs gap-2 shadow-2xs">
             <span className="text-slate-500 font-mono text-[11px] font-bold">ROOM</span>
-            <span className="font-mono font-bold text-slate-900 tracking-wider">{roomId}</span>
+            <span className="font-mono font-bold text-slate-900 tracking-wider text-xs sm:text-sm">{roomId}</span>
             <button
               onClick={handleCopyCode}
               title="Copy Room Code"
-              className="text-slate-500 hover:text-slate-800 transition-colors p-0.5 cursor-pointer"
+              className="text-slate-500 hover:text-slate-800 active:scale-95 transition-all p-1 cursor-pointer min-w-[28px] min-h-[28px] flex items-center justify-center touch-manipulation"
             >
               {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
             <button
               onClick={handleCopyLink}
               title="Copy Game Link"
-              className="text-slate-500 hover:text-blue-600 transition-colors p-0.5 cursor-pointer ml-0.5 border-l border-slate-200 pl-1"
+              className="text-slate-500 hover:text-blue-600 active:scale-95 transition-all p-1 cursor-pointer border-l border-slate-200 pl-1.5 min-w-[28px] min-h-[28px] flex items-center justify-center touch-manipulation"
             >
               {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <LinkIcon className="w-3.5 h-3.5" />}
             </button>

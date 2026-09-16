@@ -525,10 +525,10 @@ export const ResultsView: React.FC<ResultsViewProps> = ({
       )}
 
       {/* Section 3: Return to Lobby Action Button */}
-      <div className="w-full flex justify-center py-2 pb-6">
+      <div className="w-full flex justify-center py-2 pb-8">
         <button
           onClick={onReturnHome}
-          className="px-8 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2.5 transition-all cursor-pointer shadow-md hover:shadow-lg"
+          className="w-full sm:w-auto min-h-[48px] px-8 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-extrabold text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-md hover:shadow-lg touch-manipulation"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Return to Lobby</span>

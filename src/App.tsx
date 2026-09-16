@@ -254,7 +254,7 @@ export default function App() {
   const myTeammateBid = myTeammatePlayer ? clientState?.bids[myTeammatePlayer.id] : null;
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans antialiased overflow-x-hidden">
+    <div className="min-h-screen min-h-[100dvh] bg-slate-100 text-slate-900 flex flex-col font-sans antialiased overflow-x-hidden pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       {/* Persistent Header */}
       <Header
         roomId={clientState?.roomId || ''}
@@ -270,9 +270,9 @@ export default function App() {
 
       {/* Main Content Area */}
       <main
-        className={`flex-1 flex flex-col items-center relative ${
+        className={`flex-1 flex flex-col items-center relative w-full ${
           clientState?.phase === 'MATCH_COMPLETE'
-            ? 'justify-start overflow-y-auto w-full py-4 sm:py-6'
+            ? 'justify-start overflow-y-auto py-4 sm:py-6'
             : 'justify-center'
         }`}
       >

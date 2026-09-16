@@ -1,1 +1,33 @@
 @import "tailwindcss";
+
+@layer base {
+  html,
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior-y: none;
+  }
+
+  /* Prevent automatic zoom on focus in iOS Safari for inputs */
+  @media screen and (max-width: 767px) {
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Touch action optimization for smooth gaming interaction */
+  button,
+  [role="button"],
+  .touch-card {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}

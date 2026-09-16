@@ -41,8 +41,8 @@ export const RoundScoringModal: React.FC<RoundScoringModalProps> = ({
   const hasMultipleRounds = safeHistory.length > 1;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs select-none overflow-y-auto">
-      <div className="w-full max-w-2xl bg-white border border-slate-300 rounded-2xl shadow-xl p-5 sm:p-6 flex flex-col my-auto max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs select-none overflow-y-auto pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
+      <div className="w-full max-w-2xl bg-white border border-slate-300 rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col my-auto max-h-[90dvh] overflow-y-auto">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-2">
           <div className="flex items-center gap-2">
@@ -230,7 +230,7 @@ export const RoundScoringModal: React.FC<RoundScoringModalProps> = ({
                 sound.playDeal();
                 onNextGame();
               }}
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs tracking-wider uppercase shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+              className="min-h-[44px] px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs tracking-wider uppercase shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all cursor-pointer touch-manipulation"
             >
               <span>Deal Next Game</span>
               <ChevronRight className="w-4 h-4" />

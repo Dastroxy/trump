@@ -39,8 +39,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-3.5rem)] flex flex-col items-center justify-center p-3 sm:p-6 select-none relative">
-      <div className="w-full max-w-md bg-white border border-slate-300 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col items-center z-10">
+    <div className="w-full min-h-[calc(100dvh-3.5rem)] flex flex-col items-center justify-center p-3 sm:p-6 select-none relative">
+      <div className="w-full max-w-md bg-white border border-slate-300 rounded-3xl shadow-sm p-5 sm:p-8 flex flex-col items-center z-10">
         {/* Brand Badge */}
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 mb-3">
           <Sparkles className="w-3.5 h-3.5 text-blue-600" />
@@ -70,7 +70,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             onChange={(e) => onPlayerNameChange(e.target.value)}
             placeholder="Enter your name"
             maxLength={18}
-            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm font-semibold focus:outline-none focus:border-blue-500 transition-colors shadow-2xs"
+            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-base sm:text-sm font-semibold focus:outline-none focus:border-blue-500 transition-colors shadow-2xs touch-manipulation"
           />
         </div>
 
@@ -79,7 +79,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <label className="block text-xs font-mono font-bold text-slate-700 mb-2 uppercase tracking-wider">
             Select Your Avatar
           </label>
-          <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {AVATAR_PRESETS.map((av) => {
               const isSelected =
                 selectedAvatar === av.id ||
@@ -99,7 +99,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     sound.playCardSelect();
                     onSelectAvatar(av.id);
                   }}
-                  className={`flex flex-col items-center py-2 px-1 rounded-xl border transition-all duration-150 cursor-pointer ${
+                  className={`flex flex-col items-center py-2 px-1 rounded-xl border transition-all duration-150 cursor-pointer min-h-[64px] touch-manipulation active:scale-95 ${
                     isSelected
                       ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-300 shadow-2xs'
                       : 'bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
@@ -124,7 +124,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <button
           onClick={handleHost}
           disabled={!playerName.trim()}
-          className={`w-full py-3 rounded-xl font-extrabold text-sm tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm transition-all mb-3 ${
+          className={`w-full min-h-[48px] py-3 rounded-xl font-extrabold text-sm tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm transition-all mb-3 touch-manipulation active:scale-[0.99] ${
             playerName.trim()
               ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20 cursor-pointer'
               : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
@@ -148,14 +148,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
               type="text"
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              placeholder="6-DIGIT ROOM CODE"
+              placeholder="6-DIGIT CODE"
               maxLength={6}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm font-mono font-bold tracking-widest text-center uppercase focus:outline-none focus:border-blue-500 transition-colors shadow-2xs"
+              className="flex-1 px-3 sm:px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-base sm:text-sm font-mono font-bold tracking-widest text-center uppercase focus:outline-none focus:border-blue-500 transition-colors shadow-2xs touch-manipulation"
             />
             <button
               type="submit"
               disabled={!joinCode.trim() || !playerName.trim()}
-              className={`px-5 rounded-xl font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 transition-all ${
+              className={`min-h-[44px] px-5 rounded-xl font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 transition-all touch-manipulation active:scale-95 ${
                 joinCode.trim() && playerName.trim()
                   ? 'bg-slate-800 hover:bg-slate-900 text-white cursor-pointer shadow-xs'
                   : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'

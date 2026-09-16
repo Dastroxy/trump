@@ -48,15 +48,15 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         </p>
 
         {/* Room Code & Copy Share Link */}
-        <div className="flex items-center justify-center gap-2.5 mt-3 sm:mt-4">
-          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-300 font-mono text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 shadow-2xs">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-3 sm:mt-4">
+          <div className="px-3.5 py-2 rounded-xl bg-white border border-slate-300 font-mono text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 shadow-2xs">
             <span className="text-xs text-slate-500 font-sans font-semibold">CODE:</span>
             <span className="text-blue-700 tracking-wider font-extrabold">{roomId}</span>
           </div>
 
           <button
             onClick={handleCopyLink}
-            className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+            className="min-h-[42px] px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 active:scale-95 border border-slate-300 text-slate-800 text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer touch-manipulation"
           >
             {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-600" />}
             <span>{copiedLink ? 'Link Copied!' : 'Copy Link'}</span>
@@ -64,10 +64,10 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 w-full mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 w-full mb-6">
         {/* Left 2 Cols: 6 Player Slots */}
         <div className="lg:col-span-2 bg-white border border-slate-300 rounded-2xl p-4 sm:p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
+          <div className="flex flex-wrap items-center justify-between mb-4 border-b border-slate-200 pb-3 gap-2">
             <div className="flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-blue-600" />
               <h2 className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wide">
@@ -81,7 +81,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                   sound.playCardSelect();
                   onFillBots();
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                className="min-h-[38px] px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 active:scale-95 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs touch-manipulation"
               >
                 <Bot className="w-3.5 h-3.5" />
                 <span>Fill Empty With Bots</span>
@@ -238,7 +238,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                   sound.playCardSelect();
                   onStartSeating();
                 }}
-                className={`w-full py-2.5 rounded-xl font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm transition-all ${
+                className={`w-full min-h-[48px] py-3 rounded-xl font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm transition-all touch-manipulation active:scale-[0.99] ${
                   isFull
                     ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25 cursor-pointer'
                     : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
